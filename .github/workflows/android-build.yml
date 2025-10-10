@@ -24,7 +24,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-modules-
 
-      # Step 3: Setup Node.js
+      # Step 3: Setup Node.js (React Native requires Node 20+)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      # Step 5: Decode and restore keystore
+      # Step 5: Decode and restore keystore from GitHub Secret
       - name: Decode keystore
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/my-release-key.keystore
@@ -47,10 +47,10 @@ jobs:
       - name: Build Android Release APK
         working-directory: android
         env:
-          MYAPP_UPLOAD_STORE_FILE: my-release-key.keystore
-          MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ANDROID_KEYSTORE_BASE64: my-release-key.keystore
+          MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }}
+          MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }}
+          MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
         run: ./gradlew assembleRelease
 
       # Step 8: Upload the release APK
