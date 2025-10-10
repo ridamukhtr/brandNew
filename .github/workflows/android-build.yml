@@ -1,4 +1,4 @@
-name: Android CI/CD
+name: Android CI/CD (AAB)
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
       - name: Make Gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Build Android Release APK
+      - name: Build Android Release AAB
         working-directory: android
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -47,10 +47,10 @@ jobs:
           MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }}
           MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }}
           MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: ./gradlew bundleRelease
 
-      - name: Upload Release APK
+      - name: Upload Release AAB
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: app-release-bundle
+          path: android/app/build/outputs/bundle/release/app-release.aab
