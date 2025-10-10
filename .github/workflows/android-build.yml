@@ -37,7 +37,7 @@ jobs:
       # Step 5: Decode and restore keystore from GitHub Secret
       - name: Decode keystore
         run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode -o android/app/my-release-key.keystore
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/my-release-key.keystore
 
       # Step 6: Make Gradlew executable
       - name: Make Gradlew executable
