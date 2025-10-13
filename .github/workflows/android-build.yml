@@ -11,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2️⃣ Cache dependencies
       - name: Cache node modules
         uses: actions/cache@v4
         with:
@@ -22,35 +24,50 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-modules-
 
+      # 3️⃣ Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # 4️⃣ Install dependencies
       - name: Install dependencies
         run: yarn install
 
+      # 5️⃣ Decode Keystore
       - name: Decode keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/my-release-key.keystore
 
+      # 6️⃣ Make Gradlew executable
       - name: Make Gradlew executable
         run: chmod +x android/gradlew
 
+      # 7️⃣ Build Release AAB
       - name: Build Android Release AAB
         working-directory: android
         env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           MYAPP_UPLOAD_STORE_FILE: my-release-key.keystore
           MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }}
           MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }}
           MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
         run: ./gradlew bundleRelease
 
+      # 8️⃣ Upload AAB artifact (optional - for backup)
       - name: Upload Release AAB
         uses: actions/upload-artifact@v4
         with:
           name: app-release-bundle
           path: android/app/build/outputs/bundle/release/app-release.aab
+
+      # 9️⃣ Upload to Google Play
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+          packageName: com.miniquoteapp # <-- your actual package name
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: internal # internal / alpha / beta / production
+          status: completed
