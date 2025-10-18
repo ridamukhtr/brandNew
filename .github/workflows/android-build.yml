@@ -45,6 +45,15 @@ jobs:
       - name: Make Gradlew executable
         run: chmod +x android/gradlew
 
+      # 🆙 Auto-increment versionCode
+      - name: Bump version code
+        run: |
+          buildGradle="android/app/build.gradle"
+          versionCode=$(grep versionCode $buildGradle | awk '{print $2}')
+          newVersionCode=$((versionCode + 1))
+          sed -i "s/versionCode [0-9]*/versionCode $newVersionCode/" $buildGradle
+          echo "🔢 Updated versionCode to $newVersionCode"
+
       # 7️⃣ Build Release AAB
       - name: Build Android Release AAB
         working-directory: android
